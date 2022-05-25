@@ -17,4 +17,7 @@ TEE_Result adi_otp_invalidate(struct adi_otp *otp, uint32_t id);
 
 struct adi_otp *adi_get_otp(void);
 
+int adi_otp_major(void);
+int adi_otp_minor(void);
+
 #endif
