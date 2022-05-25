@@ -15,10 +15,6 @@
 
 static struct adi_otp __otp = { 0 };
 
-/**
- * param 0: OTP ID to read
- * param 1: buffer to read into
- */
 static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 	TEE_Param params[TEE_NUM_PARAMS])
 {
@@ -44,10 +40,6 @@ static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 		&params[1].memref.size);
 }
 
-/**
- * param 0: OTP ID to write
- * param 1: buffer to write from
- */
 static TEE_Result cmd_write(void *session __unused, uint32_t param_types,
 	TEE_Param params[TEE_NUM_PARAMS])
 {
@@ -73,11 +65,8 @@ static TEE_Result cmd_write(void *session __unused, uint32_t param_types,
 		params[1].memref.size);
 }
 
-/**
- * param 0: OTP ID to invalidate
- */
-static TEE_Result cmd_invalidate(void *session __unused, uint32_t param_types __unused,
-	TEE_Param params[TEE_NUM_PARAMS] __unused)
+static TEE_Result cmd_invalidate(void *session __unused, uint32_t param_types,
+	TEE_Param params[TEE_NUM_PARAMS])
 {
 	uint32_t id;
 	const uint32_t expected = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
@@ -100,6 +89,25 @@ static TEE_Result cmd_invalidate(void *session __unused, uint32_t param_types __
 	return adi_otp_invalidate(&__otp, id);
 }
 
+static TEE_Result cmd_version(void *session __unused, uint32_t param_types,
+	TEE_Param params[TEE_NUM_PARAMS])
+{
+	const uint32_t expected = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_OUTPUT,
+		TEE_PARAM_TYPE_NONE,
+		TEE_PARAM_TYPE_NONE,
+		TEE_PARAM_TYPE_NONE);
+
+	if (param_types != expected) {
+		DMSG("otp pta: param types mismatch\n");
+		return TEE_ERROR_BAD_PARAMETERS;
+	}
+
+	params[0].value.a = adi_otp_major();
+	params[0].value.b = adi_otp_minor();
+
+	return TEE_SUCCESS;
+}
+
 static TEE_Result invoke_command( void *session, uint32_t cmd, uint32_t param_types,
 	TEE_Param params[TEE_NUM_PARAMS])
 {
@@ -110,6 +118,8 @@ static TEE_Result invoke_command( void *session, uint32_t cmd, uint32_t param_ty
 		return cmd_write(session, param_types, params);
 	case ADI_OTP_CMD_INVALIDATE:
 		return cmd_invalidate(session, param_types, params);
+	case ADI_OTP_CMD_VERSION:
+		return cmd_version(session, param_types, params);
 	default:
 		DMSG("otp pta: received invalid command %d\n", cmd);
 		return TEE_ERROR_BAD_PARAMETERS;
