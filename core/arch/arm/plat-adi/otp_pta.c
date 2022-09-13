@@ -15,6 +15,10 @@
 
 static struct adi_otp __otp = { 0 };
 
+struct adi_otp *adi_get_otp(void) {
+	return &__otp;
+}
+
 static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 	TEE_Param params[TEE_NUM_PARAMS])
 {
@@ -37,7 +41,7 @@ static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 	}
 
 	return adi_otp_read(&__otp, id, params[1].memref.buffer,
-		&params[1].memref.size);
+		&params[1].memref.size, ADI_OTP_ACCESS_NONSECURE);
 }
 
 static TEE_Result cmd_write(void *session __unused, uint32_t param_types,
@@ -62,7 +66,7 @@ static TEE_Result cmd_write(void *session __unused, uint32_t param_types,
 	}
 
 	return adi_otp_write(&__otp, id, params[1].memref.buffer,
-		params[1].memref.size);
+		params[1].memref.size, ADI_OTP_ACCESS_NONSECURE);
 }
 
 static TEE_Result cmd_invalidate(void *session __unused, uint32_t param_types,
@@ -86,7 +90,7 @@ static TEE_Result cmd_invalidate(void *session __unused, uint32_t param_types,
 		return TEE_ERROR_BAD_PARAMETERS;
 	}
 
-	return adi_otp_invalidate(&__otp, id);
+	return adi_otp_invalidate(&__otp, id, ADI_OTP_ACCESS_NONSECURE);
 }
 
 static TEE_Result cmd_version(void *session __unused, uint32_t param_types,
