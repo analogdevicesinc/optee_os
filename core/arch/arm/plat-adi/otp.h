@@ -11,9 +11,14 @@ struct adi_otp {
 	vaddr_t control_base;
 };
 
-TEE_Result adi_otp_read(struct adi_otp *otp, uint32_t id, void *buf, uint32_t *len);
-TEE_Result adi_otp_write(struct adi_otp *otp, uint32_t id, void *buf, uint32_t len);
-TEE_Result adi_otp_invalidate(struct adi_otp *otp, uint32_t id);
+#define ADI_OTP_ACCESS_NONSECURE 0
+#define ADI_OTP_ACCESS_SECURE 1
+
+TEE_Result adi_otp_read(struct adi_otp *otp, uint32_t id, void *buf, uint32_t *len,
+	uint32_t access);
+TEE_Result adi_otp_write(struct adi_otp *otp, uint32_t id, void *buf, uint32_t len,
+	uint32_t access);
+TEE_Result adi_otp_invalidate(struct adi_otp *otp, uint32_t id, uint32_t access);
 
 struct adi_otp *adi_get_otp(void);
 
