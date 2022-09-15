@@ -6,8 +6,11 @@
  */
 
 #include <assert.h>
+#include <crypto/crypto.h>
 #include <inttypes.h>
+#include <kernel/panic.h>
 #include <kernel/tee_common_otp.h>
+#include <trace.h>
 
 #include "otp.h"
 
@@ -35,8 +38,17 @@ TEE_Result tee_otp_get_hw_unique_key(struct tee_hw_unique_key *hwkey)
 		}
 	}
 
-	if (zeroes)
-		EMSG("HUK OTP is programmed with zeroes--please program a real HUK or enable autogeneration\n");
+	if (zeroes) {
+#ifdef CFG_ADI_AUTOGEN_HUK
+		result = crypto_rng_read(buffer, sizeof(buffer));
+		if (TEE_SUCCESS != result)
+			panic("Could not read enough data from crypto RNG to initialize HUK!\n");
+
+		adi_otp_write(otp, ADI_OTP_ID_huk, buffer, sizeof(buffer), ADI_OTP_ACCESS_SECURE);
+#else
+		EMSG("HUK OTP is programmed with zeroes--please program a real HUK or enable CFG_ADI_AUTOGEN_HUK\n");
+#endif
+	}
 
 	memcpy(&hwkey->data[0], buffer, sizeof(hwkey->data));
 	return TEE_SUCCESS;
