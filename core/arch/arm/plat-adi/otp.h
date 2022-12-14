@@ -19,6 +19,10 @@ TEE_Result adi_otp_read(struct adi_otp *otp, uint32_t id, void *buf, uint32_t *l
 TEE_Result adi_otp_write(struct adi_otp *otp, uint32_t id, void *buf, uint32_t len,
 	uint32_t access);
 TEE_Result adi_otp_invalidate(struct adi_otp *otp, uint32_t id, uint32_t access);
+TEE_Result adi_otp_is_written(struct adi_otp *otp, uint32_t id, uint32_t access,
+	uint32_t *written);
+TEE_Result adi_otp_is_valid(struct adi_otp *otp, uint32_t id, uint32_t access,
+	uint32_t *valid);
 
 struct adi_otp *adi_get_otp(void);
 
