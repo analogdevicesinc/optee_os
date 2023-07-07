@@ -1,5 +1,6 @@
 PLATFORM_FLAVOR ?= adsp_sc598
 
+ifeq ($(PLATFORM_FLAVOR), adsp_sc598)
 $(call force,CFG_ARM64_core,y)
 include core/arch/arm/cpu/cortex-armv8-0.mk
 supported-ta-targets = ta_arm64
@@ -8,6 +9,9 @@ $(call force,CFG_ARM_GICV3,y)
 $(call force,CFG_WITH_LPAE,y)
 $(call force,CFG_WITH_ARM_TRUSTED_FW,y)
 $(call force,CFG_SECURE_TIME_SOURCE_CNTPCT,y)
+else
+$(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
+endif
 
 $(call force,CFG_CORE_ASLR,n)
 
