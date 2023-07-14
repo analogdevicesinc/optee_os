@@ -1,2 +1,2 @@
 
-srcs-y += spu.c
+srcs-y += smpu.c spu.c
