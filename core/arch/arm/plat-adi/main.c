@@ -19,8 +19,8 @@
 #define ADI_UART4_RBR 0x20
 #define ADI_UART4_THR 0x24
 
-register_phys_mem_pgdir(MEM_AREA_IO_NSEC, ADSP_SC598_UART0_BASE, ADSP_SC598_UART_SIZE);
-register_phys_mem_pgdir(MEM_AREA_IO_SEC, ADSP_SC598_GICD_BASE, ADSP_SC598_GIC_SIZE);
+register_phys_mem(MEM_AREA_IO_NSEC, ADSP_SC598_UART0_BASE, ADSP_SC598_UART_SIZE);
+register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC598_GICD_BASE, ADSP_SC598_GIC_SIZE);
 
 static struct gic_data gic_data __nex_bss;
 
