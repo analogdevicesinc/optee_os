@@ -253,10 +253,10 @@ static TEE_Result invoke_command( void *session, uint32_t cmd, uint32_t param_ty
 #define ROM_OTP_CONTROL_ADDR           0x31011000
 
 #define ROM_OTP_SIZE                   0x2000
-#define ROM_OTP_CONTROL_SIZE           0x100
+#define ROM_OTP_CONTROL_SIZE           0x1000
 
-register_phys_mem_pgdir(MEM_AREA_IO_SEC, ROM_OTP_BASE_ADDR, ROM_OTP_SIZE);
-register_phys_mem_pgdir(MEM_AREA_IO_SEC, ROM_OTP_CONTROL_ADDR, ROM_OTP_CONTROL_SIZE);
+register_phys_mem(MEM_AREA_IO_SEC, ROM_OTP_BASE_ADDR, ROM_OTP_SIZE);
+register_phys_mem(MEM_AREA_IO_SEC, ROM_OTP_CONTROL_ADDR, ROM_OTP_CONTROL_SIZE);
 
 static TEE_Result adi_otp_init(void) {
 	__otp.control_base = core_mmu_get_va(ROM_OTP_CONTROL_ADDR, MEM_AREA_IO_SEC,
