@@ -1,0 +1,121 @@
+// SPDX-License-Identifier: BSD-2-Clause
+/**
+ * SMPU driver for ADI SC5xx SoCs
+ *
+ * Copyright (c) 2023, Analog Devices, Inc.
+ */
+
+#include <inttypes.h>
+#include <initcall.h>
+#include <io.h>
+#include <kernel/panic.h>
+#include <mm/core_mmu.h>
+#include <mm/core_memprot.h>
+#include <platform_config.h>
+#include <trace.h>
+#include <util.h>
+
+register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SMPU9_BASE, ADSP_SC5XX_SMPU9_SIZE);
+
+#define SMPU_REGION_REGS_SIZE	0x18
+#define SMPU_MAX_REGIONS		8
+
+#define SMPU_RCTL(n)		(0x20 + SMPU_REGION_REGS_SIZE*(n))
+#define SMPU_RCTL_WPROTEN	BIT(10)
+#define SMPU_RCTL_RPROTEN	BIT(8)
+#define SMPU_RCTL_EN		BIT(0)
+
+#define SMPU_RADDR(n)		(0x24 + SMPU_REGION_REGS_SIZE*(n))
+#define SMPU_RIDA(n)		(0x28 + SMPU_REGION_REGS_SIZE*(n))
+#define SMPU_RIDMASKA(n)	(0x2c + SMPU_REGION_REGS_SIZE*(n))
+#define SMPU_RIDB(n)		(0x30 + SMPU_REGION_REGS_SIZE*(n))
+#define SMPU_RIDMASKB(n)	(0x34 + SMPU_REGION_REGS_SIZE*(n))
+
+#define SMPU_SECURERCTL(n)	(0x820 + 4*(n))
+
+/**
+ * We use the secure access settings to restrict regions based on the secure/insecure
+ * state of the master accessing the region, rather than doing ID based comparisons
+ * because the IDs do not extend to core secure/insecure options
+ */
+static void smpu_configure_region(vaddr_t smpu_base, uint32_t id, uint32_t base,
+	uint32_t size)
+{
+	// Regions are page aligned and multiples of the page size
+	base = base & ~0xfff;
+	if (size & (size-1)) {
+		EMSG("Invalid size 0x%x specified\n", size);
+		return;
+	}
+
+	// ctz operation is equivalent to log2(n) for a power of 2 input, verified above
+	// and size should be shifted such that 4096 = 2^12 is 0
+	size = __builtin_ctz(size) - 12;
+
+	if (id < SMPU_MAX_REGIONS) {
+		DMSG("configuring region %u [0x%x, 0x%x] for secure-only transactions\n", id,
+			base, base + (1 << (size + 12)) - 1);
+
+		io_write32(smpu_base + SMPU_RADDR(id), base);
+		// 0 = secure enabled, non-secure disabled
+		io_write32(smpu_base + SMPU_SECURERCTL(id), 0);
+		io_write32(smpu_base + SMPU_RCTL(id), (size << 1) | SMPU_RCTL_EN);
+	}
+}
+
+/**
+ * Region does not need to be a power of 2, but if we run out of SMPU regions
+ * kill the system. This should be used for compound or not well-aligned mappings
+ * because the SMPU requires strict size based alignment (i.e. 16 MB must be
+ * 16 MB aligned, not 4 KB aligned)
+ */
+static uint32_t smpu_configure_compound_region(vaddr_t smpu_base, uint32_t id,
+	uint32_t base, uint32_t size)
+{
+	while (size && id < SMPU_MAX_REGIONS) {
+		uint32_t rsize = (1 << __builtin_ctz(size));
+		smpu_configure_region(smpu_base, id, base, rsize);
+		id += 1;
+		base += rsize;
+		size -= rsize;
+	}
+
+	if (size) {
+		DMSG("Could not configure SMPUs to cover the entire trusted memory region\n");
+		DMSG("Please reassign it with better alignment\n");
+		panic();
+	}
+
+	return id;
+}
+
+static TEE_Result smpu_init(void) {
+	uint32_t tzbase, tzsize;
+	uint32_t id;
+	vaddr_t smpu_base = core_mmu_get_va(ADSP_SC5XX_SMPU9_BASE, MEM_AREA_IO_SEC,
+		ADSP_SC5XX_SMPU9_SIZE);
+
+	if (!smpu_base)
+		panic();
+
+	/*
+	 * Peripheral restrictions are generally covered through the SPU
+	 * So we only configure the SMPU for DMC0 (SMPU9) to cover restricted
+	 * regions of DDR
+	 */
+	tzbase = TZDRAM_BASE;
+	tzsize = TZDRAM_SIZE;
+	id = 0;
+
+	if (TZDRAM_BASE + TZDRAM_SIZE == CFG_TFAMEM_START) {
+		tzsize += CFG_TFAMEM_SIZE;
+	}
+	else {
+		id = smpu_configure_compound_region(smpu_base, id,
+			CFG_TFAMEM_START, CFG_TFAMEM_SIZE);
+	}
+
+	smpu_configure_compound_region(smpu_base, id, tzbase, tzsize);
+	return TEE_SUCCESS;
+}
+early_init(smpu_init);
