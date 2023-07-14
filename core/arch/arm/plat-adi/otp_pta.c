@@ -10,6 +10,7 @@
 
 #include "adi_otp_pta.h"
 #include "otp.h"
+#include "spu.h"
 
 #define PTA_NAME "adi_otp.pta"
 
@@ -248,12 +249,15 @@ static TEE_Result invoke_command( void *session, uint32_t cmd, uint32_t param_ty
 	}
 }
 
-/* Addresses are SC598-specific */
+/* All values are SC598-specific */
 #define ROM_OTP_BASE_ADDR              0x24000000
 #define ROM_OTP_CONTROL_ADDR           0x31011000
 
 #define ROM_OTP_SIZE                   0x2000
 #define ROM_OTP_CONTROL_SIZE           0x1000
+
+#define SPU_SECUREP_OTP_MMR            57
+#define SPU_SECUREP_SMPU_OTP           58
 
 register_phys_mem(MEM_AREA_IO_SEC, ROM_OTP_BASE_ADDR, ROM_OTP_SIZE);
 register_phys_mem(MEM_AREA_IO_SEC, ROM_OTP_CONTROL_ADDR, ROM_OTP_CONTROL_SIZE);
@@ -272,6 +276,17 @@ static TEE_Result adi_otp_init(void) {
 	return TEE_SUCCESS;
 }
 early_init(adi_otp_init);
+
+/**
+ * This depends on spu and smpu init being completed in the early stage
+ */
+static TEE_Result adi_otp_secure_init(void) {
+	spu_peripheral_secure(SPU_SECUREP_OTP_MMR);
+	spu_peripheral_secure(SPU_SECUREP_SMPU_OTP);
+
+	return TEE_SUCCESS;
+}
+early_init_late(adi_otp_secure_init);
 
 pseudo_ta_register(.uuid = PTA_ADI_OTP_UUID, .name = PTA_NAME,
 		   .flags = PTA_DEFAULT_FLAGS | TA_FLAG_DEVICE_ENUM,
