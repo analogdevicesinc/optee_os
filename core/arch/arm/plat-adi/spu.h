@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 #ifndef ADI_SPU_H
 #define ADI_SPU_H
 /**
@@ -6,7 +7,6 @@
  * trusted applications to request changes to the security status of
  * system peripherals
  *
- * @todo spdx identifier
  * Copyright (c) 2023, Analog Devices, Inc.
  */
 
@@ -28,5 +28,10 @@ void spu_peripheral_writeprotect(uint32_t n, uint32_t mask);
  * Enable secure-only options for the given peripheral n
  */
 void spu_peripheral_secure(uint32_t n);
+
+/**
+ * Per platform initialization function called by the SPU driver
+ */
+void spu_platform_init(void);
 
 #endif
