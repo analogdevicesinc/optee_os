@@ -17,8 +17,16 @@ $(call force,CFG_CORE_ASLR,n)
 
 CFG_TEE_CORE_NB_CORE ?= 1
 
+# The default memory layout for SC598:
+# 0x80000000 - 0x9edfffff - Insecure DDR, split between SHARC/Linux
+# 0x9ee00000 - 0x9eefffff - Insecure optee shmem for communicating with linux
+# 0x9ef00000 - 0x9fefffff - Secured optee os/ta memory region
+# 0x9ff00000 - 0x9fffffff - Secured BL31 memory region
+# The last two regions are secured by the SMPU
+CFG_TFAMEM_START ?= 0x9ff00000
+CFG_TFAMEM_SIZE  ?= 0x00100000
 CFG_TZDRAM_START ?= 0x9ef00000
-CFG_TZDRAM_SIZE ?= 0x01000000
+CFG_TZDRAM_SIZE  ?= 0x01000000
 CFG_SHMEM_SIZE ?= 0x00f00000
 CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
 CFG_TEE_RAM_VA_SIZE ?= 0x00400000
