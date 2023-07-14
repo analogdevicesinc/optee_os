@@ -27,6 +27,11 @@
 #define SPU_SECUREP_COUNT 213
 #define SPU_WP_COUNT 213
 
+#define SPU_SECURECHK 0x84c
+
+/* SECURECHK reads all-ones when OP-TEE is running as the secure master */
+#define SPU_SECURECHK_SECURE_MASTER 0xffffffffU
+
 register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SPU0_BASE, ADSP_SC5XX_SPU0_SIZE);
 
 static vaddr_t spu0_base __nex_bss;
@@ -48,11 +53,16 @@ void spu_peripheral_secure(uint32_t n)
 
 static TEE_Result init_spu(void)
 {
+	uint32_t val;
 	spu0_base = core_mmu_get_va(ADSP_SC5XX_SPU0_BASE, MEM_AREA_IO_SEC,
 				    ADSP_SC5XX_SPU0_SIZE);
 
 	if (!spu0_base)
 		panic();
+
+	val = io_read32(spu0_base + SPU_SECURECHK);
+	if (val != SPU_SECURECHK_SECURE_MASTER)
+		EMSG("OP-TEE is not running as a secure master, chk = 0x%x!\n", val);
 
 	spu_platform_init();
 	return TEE_SUCCESS;
