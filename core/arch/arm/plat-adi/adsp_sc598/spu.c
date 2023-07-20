@@ -24,6 +24,11 @@ void spu_platform_init(void) {
 	/**
 	 * Note that the CGU, CDU, and PLL are WP only so that
 	 * they can be read by the nonsecure components
+	 * Notes:
+	 * - Crypto PKP includes TRNG and PKA modules so we centralize the crypto
+	 *   settings to avoid issues with which specific driver is responsible,
+	 *   between the TRNG driver and the crypto driver, as either or both may
+	 *   not be enabled in a given build
 	 */
 	uint32_t securep_ids[] = {
 		109, // DMC0
@@ -31,6 +36,7 @@ void spu_platform_init(void) {
 		126, // DPM0
 		129, 130, 131, 132, 133, 134, // System Watchpoint Units
 		139, 140, // SWU and SMPU for DMC0
+		178, 179, // Crypto SPE and PKP
 		181, // DAP ROM
 		182, 183, 184, // SHARC0 DBG, CTI, PTM
 		186, 187, 188, // SHARC1 DBG, CTI, PTM
