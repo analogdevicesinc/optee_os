@@ -27,7 +27,12 @@
 #define SPU_SECUREP_COUNT 213
 #define SPU_WP_COUNT 213
 
-#define SPU_SECURECHK 0x84c
+// So far, constant on all SoCs
+#define SPU_SECURECHK 		0x84c
+#define SPU_SECUREC1		0x984
+#define SPU_SECUREC2		0x988
+
+#define SPU_SECURECHK_SECURE	0xffffffff
 
 register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SPU0_BASE, ADSP_SC5XX_SPU0_SIZE);
 
@@ -58,8 +63,10 @@ static TEE_Result init_spu(void)
 		panic();
 
 	val = io_read32(spu0_base + SPU_SECURECHK);
-	if (val != 0xffffffff)
-		EMSG("OPTEE is not running as a secure master, chk = 0x%x!\n", val);
+
+	// We expect OP-TEE to be running as secure master only when OTP is locked
+	if (val != SPU_SECURECHK_SECURE)
+		EMSG("OP-TEE is not running as a secure master, chk = 0x%x!\n", val);
 
 	spu_platform_init();
 	return TEE_SUCCESS;
