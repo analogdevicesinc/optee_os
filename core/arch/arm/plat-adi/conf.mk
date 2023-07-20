@@ -9,6 +9,13 @@ $(call force,CFG_ARM_GICV3,y)
 $(call force,CFG_WITH_LPAE,y)
 $(call force,CFG_WITH_ARM_TRUSTED_FW,y)
 $(call force,CFG_SECURE_TIME_SOURCE_CNTPCT,y)
+
+# Enable SC5xx TRNG to replace Fortuna software PRNG
+$(call force,CFG_WITH_SOFTWARE_PRNG,n)
+CFG_ADSP_SC5XX_TRNG := y
+$(call force,CFG_HWRNG_PTA,y)
+CFG_HWRNG_QUALITY := 1024
+
 else
 $(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
 endif
