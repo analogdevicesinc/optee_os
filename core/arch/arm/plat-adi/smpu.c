@@ -41,11 +41,19 @@ register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SMPU9_BASE, ADSP_SC5XX_SMPU9_SIZE)
 static void smpu_configure_region(vaddr_t smpu_base, uint32_t id, uint32_t base,
 	uint32_t size)
 {
-	// Regions are page aligned and multiples of the page size
-	base = base & ~0xfff;
+	uint32_t aligned_base;
+
+	// Size must be a power of 2
 	if (size & (size-1)) {
-		EMSG("Invalid size 0x%x specified\n", size);
-		return;
+		EMSG("Invalid size 0x%x specified for smpu\n", size);
+		panic();
+	}
+
+	// Regions are size-aligned, not page aligned!
+	aligned_base = base & ~(size-1);
+	if (base != aligned_base) {
+		EMSG("SMPU region base must be aligned as a multiple of the region size\n");
+		panic();
 	}
 
 	// ctz operation is equivalent to log2(n) for a power of 2 input, verified above
