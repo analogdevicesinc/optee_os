@@ -27,7 +27,9 @@
 #define SPU_SECUREP_COUNT 213
 #define SPU_WP_COUNT 213
 
-#define SPU_SECURECHK 0x84c
+#define SPU_SECURECHK 		0x84c
+#define SPU_SECUREC1		0x984
+#define SPU_SECUREC2		0x988
 
 /* SECURECHK reads all-ones when OP-TEE is running as the secure master */
 #define SPU_SECURECHK_SECURE_MASTER 0xffffffffU
@@ -59,6 +61,10 @@ static TEE_Result init_spu(void)
 
 	if (!spu0_base)
 		panic();
+
+	// Re-set SECUREC settings to prevent access to SHARC L1 by non-secure masters
+	io_write32(spu0_base + SPU_SECUREC1, 1);
+	io_write32(spu0_base + SPU_SECUREC2, 1);
 
 	val = io_read32(spu0_base + SPU_SECURECHK);
 	if (val != SPU_SECURECHK_SECURE_MASTER)
