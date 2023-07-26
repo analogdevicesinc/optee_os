@@ -12,8 +12,6 @@
 #include "../spu.h"
 
 /**
- * @todo consider RCU as well, this requires the reset control unit to be migrated
- * and properly supported through ARM PSCI (power state coordination interface)
  * @todo Consider:
  * - SMPU L2-related registers; these should only be configurable on sharc possibly?
  * - More of the debug registers need to be covered to prevent enabling them
