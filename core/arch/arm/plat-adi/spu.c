@@ -62,6 +62,10 @@ static TEE_Result init_spu(void)
 	if (!spu0_base)
 		panic();
 
+	// Re-set SECUREC settings to prevent access to SHARC L1 by non-secure masters
+	io_write32(spu0_base + SPU_SECUREC1, 1);
+	io_write32(spu0_base + SPU_SECUREC2, 1);
+
 	val = io_read32(spu0_base + SPU_SECURECHK);
 
 	// We expect OP-TEE to be running as secure master only when OTP is locked

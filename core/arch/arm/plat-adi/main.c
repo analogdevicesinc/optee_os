@@ -20,12 +20,8 @@
 #define ADI_UART4_RBR 0x20
 #define ADI_UART4_THR 0x24
 
-register_phys_mem(MEM_AREA_IO_NSEC, ADSP_SC598_UART0_BASE,
-		   ADSP_SC598_UART_SIZE);
-register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC598_GICD_BASE,
-		   ADSP_SC598_GIC_SIZE);
-
-static struct gic_data gic_data __nex_bss;
+register_phys_mem(MEM_AREA_IO_NSEC, ADSP_SC5XX_UART0_BASE,
+		  ADSP_SC5XX_UART_SIZE);
 
 static void adsp_serial_flush(struct serial_chip *chip __unused)
 {
@@ -33,9 +29,9 @@ static void adsp_serial_flush(struct serial_chip *chip __unused)
 
 static int adsp_serial_getchar(struct serial_chip *chip __unused)
 {
-	vaddr_t uart_base = core_mmu_get_va(ADSP_SC598_UART0_BASE,
+	vaddr_t uart_base = core_mmu_get_va(ADSP_SC5XX_UART0_BASE,
 					    MEM_AREA_IO_NSEC,
-					    ADSP_SC598_UART_SIZE);
+					    ADSP_SC5XX_UART_SIZE);
 
 	while (!(io_read32(uart_base + ADI_UART4_STATUS) & ADI_UART4_STATUS_DR))
 		;
@@ -45,9 +41,9 @@ static int adsp_serial_getchar(struct serial_chip *chip __unused)
 
 static void adsp_serial_putc(struct serial_chip *chip __unused, int ch)
 {
-	vaddr_t uart_base = core_mmu_get_va(ADSP_SC598_UART0_BASE,
+	vaddr_t uart_base = core_mmu_get_va(ADSP_SC5XX_UART0_BASE,
 					    MEM_AREA_IO_NSEC,
-					    ADSP_SC598_UART_SIZE);
+					    ADSP_SC5XX_UART_SIZE);
 
 	if ('\n' == ch)
 		adsp_serial_putc(chip, '\r');
@@ -69,30 +65,10 @@ static struct serial_chip uart_chip __nex_bss = {
 	.ops = &uart_ops,
 };
 
-void itr_core_handler(void)
-{
-	gic_it_handle(&gic_data);
-}
-
 /**
  * Inherit serial configuration from previous bootloaders
  */
-void console_init(void)
+void plat_console_init(void)
 {
 	register_serial_console(&uart_chip);
-}
-
-void main_init_gic(void)
-{
-	vaddr_t gicd_base;
-
-	gicd_base = core_mmu_get_va(ADSP_SC598_GICD_BASE, MEM_AREA_IO_SEC,
-				    ADSP_SC598_GIC_SIZE);
-
-	if (!gicd_base)
-		panic();
-
-	/* Initialize GIC */
-	gic_init(&gic_data, 0, gicd_base);
-	itr_init(&gic_data.chip);
 }
