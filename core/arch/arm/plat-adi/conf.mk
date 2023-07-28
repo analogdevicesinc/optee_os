@@ -38,7 +38,7 @@ CFG_SHMEM_SIZE ?= 0x00f00000
 CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
 CFG_TEE_RAM_VA_SIZE ?= 0x00400000
 
-CFG_MMAP_REGIONS ?= 24
+CFG_MMAP_REGIONS ?= 32
 
 # OTP Configuration options. If _ALL = y then the OTP pTA makes requests as a secure
 # source. Otherwise, it makes them as a nonsecure source. You may wish to set LOCK_ALL
