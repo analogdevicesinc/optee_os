@@ -1,6 +1,6 @@
 
 global-incdirs-y += .
-srcs-y += main.c otp_pta.c huk.c smpu.c spu.c
+srcs-y += entry_fast.c main.c otp_pta.c huk.c smpu.c spu.c
 
 srcs-$(CFG_PSCI_ARM32) += psci.c 
 

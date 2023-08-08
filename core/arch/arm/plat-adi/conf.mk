@@ -56,3 +56,7 @@ CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
 CFG_ADI_SHARC_LOADER ?= y
 CFG_ADI_SHARC_ALLOW_UNVERIFIED ?= n
 
+# Restrict TRU to OPTEE and provide SMC to trigger only certain masters
+# If yes the TRU cannot be configured from Linux and the adi,optee-tru
+# driver must be used instead
+CFG_ADI_TRU ?= y
