@@ -20,9 +20,6 @@
 #define ADI_UART4_THR 0x24
 
 register_phys_mem(MEM_AREA_IO_NSEC, ADSP_SC5XX_UART0_BASE, ADSP_SC5XX_UART_SIZE);
-register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_GICD_BASE, ADSP_SC5XX_GIC_SIZE);
-
-static struct gic_data gic_data __nex_bss;
 
 static void adsp_serial_flush(struct serial_chip *chip __unused) {
 }
@@ -62,10 +59,6 @@ static struct serial_chip uart_chip __nex_bss = {
 	.ops = &uart_ops,
 };
 
-void itr_core_handler(void) {
-	gic_it_handle(&gic_data);
-}
-
 /**
  * Inherit serial configuration from previous bootloaders
  */
@@ -74,18 +67,4 @@ void console_init(void) {
 		ADSP_SC5XX_UART_SIZE);
 
 	register_serial_console(&uart_chip);
-}
-
-void main_init_gic(void) {
-	vaddr_t gicd_base;
-
-	gicd_base = core_mmu_get_va(ADSP_SC5XX_GICD_BASE, MEM_AREA_IO_SEC,
-		ADSP_SC5XX_GIC_SIZE);
-
-	if (!gicd_base)
-		panic();
-
-	/* Initialize GIC */
-	gic_init(&gic_data, 0, gicd_base);
-	itr_init(&gic_data.chip);
 }
