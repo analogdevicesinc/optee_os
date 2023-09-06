@@ -1,5 +1,5 @@
 
-global-incdirs-y += .
+global-incdirs-y += . $(PLATFORM_FLAVOR)
 srcs-y += entry_fast.c main.c smpu.c spu.c
 
 srcs-$(CFG_ADSP_SC5XX_OTP) += huk.c otp_pta.c
