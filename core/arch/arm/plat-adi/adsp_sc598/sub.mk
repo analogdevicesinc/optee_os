@@ -1,2 +1,2 @@
 
-srcs-y += gic.c spu.c
+srcs-y += gic.c smpu.c spu.c

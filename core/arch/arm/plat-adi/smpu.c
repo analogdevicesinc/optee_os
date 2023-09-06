@@ -15,7 +15,7 @@
 #include <trace.h>
 #include <util.h>
 
-register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SMPU9_BASE, ADSP_SC5XX_SMPU9_SIZE);
+#include "smpu.h"
 
 #define SMPU_REGION_REGS_SIZE	0x18
 #define SMPU_MAX_REGIONS		8
@@ -38,7 +38,7 @@ register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SMPU9_BASE, ADSP_SC5XX_SMPU9_SIZE)
  * state of the master accessing the region, rather than doing ID based comparisons
  * because the IDs do not extend to core secure/insecure options
  */
-static void smpu_configure_region(vaddr_t smpu_base, uint32_t id, uint32_t base,
+void smpu_configure_region(vaddr_t smpu_base, uint32_t id, uint32_t base,
 	uint32_t size)
 {
 	uint32_t aligned_base;
@@ -77,7 +77,7 @@ static void smpu_configure_region(vaddr_t smpu_base, uint32_t id, uint32_t base,
  * because the SMPU requires strict size based alignment (i.e. 16 MB must be
  * 16 MB aligned, not 4 KB aligned)
  */
-static uint32_t smpu_configure_compound_region(vaddr_t smpu_base, uint32_t id,
+uint32_t smpu_configure_compound_region(vaddr_t smpu_base, uint32_t id,
 	uint32_t base, uint32_t size)
 {
 	while (size && id < SMPU_MAX_REGIONS) {
@@ -98,32 +98,6 @@ static uint32_t smpu_configure_compound_region(vaddr_t smpu_base, uint32_t id,
 }
 
 static TEE_Result smpu_init(void) {
-	uint32_t tzbase, tzsize;
-	uint32_t id;
-	vaddr_t smpu_base = core_mmu_get_va(ADSP_SC5XX_SMPU9_BASE, MEM_AREA_IO_SEC,
-		ADSP_SC5XX_SMPU9_SIZE);
-
-	if (!smpu_base)
-		panic();
-
-	/*
-	 * Peripheral restrictions are generally covered through the SPU
-	 * So we only configure the SMPU for DMC0 (SMPU9) to cover restricted
-	 * regions of DDR
-	 */
-	tzbase = TZDRAM_BASE;
-	tzsize = TZDRAM_SIZE;
-	id = 0;
-
-	if (TZDRAM_BASE + TZDRAM_SIZE == CFG_TFAMEM_START) {
-		tzsize += CFG_TFAMEM_SIZE;
-	}
-	else {
-		id = smpu_configure_compound_region(smpu_base, id,
-			CFG_TFAMEM_START, CFG_TFAMEM_SIZE);
-	}
-
-	smpu_configure_compound_region(smpu_base, id, tzbase, tzsize);
-	return TEE_SUCCESS;
+	return smpu_platform_init();
 }
 early_init(smpu_init);
