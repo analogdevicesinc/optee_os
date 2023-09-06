@@ -22,10 +22,7 @@
 
 #define SPU_WP(n) (0x400 + 4*(n))
 
-// SC598 specific, other SoCs have fewer peripheral regions supported
-#define SPU_SECUREP_COUNT 213
-#define SPU_WP_COUNT 213
-
+// So far, constant on all SoCs
 #define SPU_SECURECHK 		0x84c
 #define SPU_SECUREC1		0x984
 #define SPU_SECUREC2		0x988
