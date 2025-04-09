@@ -1,6 +1,8 @@
 PLATFORM_FLAVOR ?= adsp_sc598
 
+####################################### SC598
 ifeq ($(PLATFORM_FLAVOR), adsp_sc598)
+
 $(call force,CFG_ARM64_core,y)
 include core/arch/arm/cpu/cortex-armv8-0.mk
 supported-ta-targets = ta_arm64
@@ -38,8 +40,31 @@ CFG_ADI_OTP_INVALIDATE_ALL ?= n
 CFG_ADI_OTP_IS_VALID_ALL ?= y
 CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
 
-else
-$(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
+############################################## SC594
+else ifeq ($(PLATFORM_FLAVOR), adsp_sc594)
+
+$(call force,CFG_ARM32_core,y)
+include core/arch/arm/cpu/cortex-a5.mk
+supported-ta-targets = ta_arm32
+$(call force,CFG_GIC,y)
+
+# The default memory layout for SC598:
+# 0x80000000 - 0x9edfffff - Insecure DDR, split between SHARC/Linux
+# 0x9e000000 - 0x9effffff - Insecure optee shmem for communicating with linux
+# 0x9ef00000 - 0x9fffffff - Secured optee os/ta memory region
+# The last two regions are secured by the SMPU
+CFG_TFAMEM_START ?= 0x9ff00000
+CFG_TFAMEM_SIZE  ?= 0x00100000
+CFG_TZDRAM_START ?= 0x9ef00000
+CFG_TZDRAM_SIZE  ?= 0x01000000
+CFG_SHMEM_SIZE ?= 0x00f00000
+CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
+CFG_TEE_RAM_VA_SIZE ?= 0x00400000
+CFG_MMAP_REGIONS ?= 32
+
+
+#################################################### Invalid flavour
+else $(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
 endif
 
 $(call force,CFG_CORE_ASLR,n)
