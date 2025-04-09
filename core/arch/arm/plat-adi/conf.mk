@@ -43,10 +43,14 @@ CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
 ############################################## SC594
 else ifeq ($(PLATFORM_FLAVOR), adsp_sc594)
 
-$(call force,CFG_ARM32_core,y)
 include core/arch/arm/cpu/cortex-a5.mk
 supported-ta-targets = ta_arm32
 $(call force,CFG_GIC,y)
+
+# we use a non-secure time source since we do not have a 
+# hardware timer in the SC594. This is reflected in the cortex-a5
+# configuration included above.
+$(call force,CFG_SECURE_TIME_SOURCE_REE,y)
 
 # The default memory layout for SC598:
 # 0x80000000 - 0x9edfffff - Insecure DDR, split between SHARC/Linux
@@ -62,6 +66,13 @@ CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
 CFG_TEE_RAM_VA_SIZE ?= 0x00400000
 CFG_MMAP_REGIONS ?= 32
 
+#$(call force,CFG_ADSP_SC5XX_OTP,y)
+CFG_ADI_OTP_READ_ALL ?= n
+CFG_ADI_OTP_WRITE_ALL ?= n
+CFG_ADI_OTP_LOCK_ALL ?= n
+CFG_ADI_OTP_INVALIDATE_ALL ?= n
+CFG_ADI_OTP_IS_VALID_ALL ?= y
+CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
 
 #################################################### Invalid flavour
 else $(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
