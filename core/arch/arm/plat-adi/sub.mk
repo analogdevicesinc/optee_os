@@ -1,6 +1,10 @@
 
 global-incdirs-y += . $(PLATFORM_FLAVOR)
-srcs-y += entry_fast.c main.c smpu.c spu.c
+ifeq ($(PLATFORM_FLAVOR),adsp_sc598)
+	srcs-y += smpu.c
+endif
+
+srcs-y += entry_fast.c main.c spu.c
 
 srcs-$(CFG_ADSP_SC5XX_OTP) += huk.c otp_pta.c
 srcs-$(CFG_PSCI_ARM32) += psci.c

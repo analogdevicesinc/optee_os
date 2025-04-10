@@ -53,26 +53,16 @@ $(call force,CFG_GIC,y)
 $(call force,CFG_SECURE_TIME_SOURCE_REE,y)
 
 # The default memory layout for SC598:
-# 0x80000000 - 0x9edfffff - Insecure DDR, split between SHARC/Linux
-# 0x9e000000 - 0x9effffff - Insecure optee shmem for communicating with linux
-# 0x9ef00000 - 0x9fffffff - Secured optee os/ta memory region
-# The last two regions are secured by the SMPU
-CFG_TFAMEM_START ?= 0x9ff00000
-CFG_TFAMEM_SIZE  ?= 0x00100000
+# 0x80000000 - 0x9e000000 - Insecure memory 
+# 0x9ef00000 - 0x9fffffff - Secured optee os
 CFG_TZDRAM_START ?= 0x9ef00000
-CFG_TZDRAM_SIZE  ?= 0x01000000
-CFG_SHMEM_SIZE ?= 0x00f00000
-CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
+CFG_TZDRAM_SIZE  ?= 0x01100000
 CFG_TEE_RAM_VA_SIZE ?= 0x00400000
 CFG_MMAP_REGIONS ?= 32
 
-#$(call force,CFG_ADSP_SC5XX_OTP,y)
-CFG_ADI_OTP_READ_ALL ?= n
-CFG_ADI_OTP_WRITE_ALL ?= n
-CFG_ADI_OTP_LOCK_ALL ?= n
-CFG_ADI_OTP_INVALIDATE_ALL ?= n
-CFG_ADI_OTP_IS_VALID_ALL ?= y
-CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
+# Not supported on SC594
+$(call force,CFG_ADSP_SC5XX_OTP,n)
+$(call force,CFG_CORE_RESERVED_SHM, n)
 
 #################################################### Invalid flavour
 else $(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
