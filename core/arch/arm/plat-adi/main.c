@@ -62,7 +62,7 @@ static struct serial_chip uart_chip __nex_bss = {
 /**
  * Inherit serial configuration from previous bootloaders
  */
-void console_init(void) {
+void plat_console_init(void) {
 	vaddr_t uart_base = core_mmu_get_va(ADSP_SC5XX_UART0_BASE, MEM_AREA_IO_NSEC,
 		ADSP_SC5XX_UART_SIZE);
 
