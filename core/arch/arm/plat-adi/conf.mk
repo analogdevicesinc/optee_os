@@ -10,20 +10,6 @@ $(call force,CFG_WITH_LPAE,y)
 $(call force,CFG_WITH_ARM_TRUSTED_FW,y)
 $(call force,CFG_SECURE_TIME_SOURCE_CNTPCT,y)
 
-# Enable SC5xx TRNG to replace Fortuna software PRNG
-$(call force,CFG_WITH_SOFTWARE_PRNG,n)
-CFG_ADSP_SC5XX_TRNG := y
-$(call force,CFG_HWRNG_PTA,y)
-CFG_HWRNG_QUALITY := 1024
-
-else
-$(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
-endif
-
-$(call force,CFG_CORE_ASLR,n)
-
-CFG_TEE_CORE_NB_CORE ?= 1
-
 # The default memory layout for SC598:
 # 0x80000000 - 0x9edfffff - Insecure DDR, split between SHARC/Linux
 # 0x9ee00000 - 0x9eefffff - Insecure optee shmem for communicating with linux
@@ -37,7 +23,6 @@ CFG_TZDRAM_SIZE  ?= 0x01000000
 CFG_SHMEM_SIZE ?= 0x00f00000
 CFG_SHMEM_START ?= ($(CFG_TZDRAM_START) - $(CFG_SHMEM_SIZE))
 CFG_TEE_RAM_VA_SIZE ?= 0x00400000
-
 CFG_MMAP_REGIONS ?= 32
 
 # OTP Configuration options. If _ALL = y then the OTP pTA makes requests as a secure
@@ -45,16 +30,40 @@ CFG_MMAP_REGIONS ?= 32
 # to y to allow userspace to lock the SoC for example, or INVALIDATE_ALL to allow
 # userspace to invalidate "secure" type keys (ex. secure jtag keys) in addition to
 # nonsecure type keys (ex. secure boot public keys, which are not a secret)
+CFG_ADSP_SC5XX_OTP ?= y
+
+ifeq ($(CFG_ADSP_SC5XX_OTP),y)
+CFG_ADI_ALLOW_ZERO_HUK ?= n
 CFG_ADI_OTP_READ_ALL ?= n
 CFG_ADI_OTP_WRITE_ALL ?= n
 CFG_ADI_OTP_LOCK_ALL ?= n
 CFG_ADI_OTP_INVALIDATE_ALL ?= n
 CFG_ADI_OTP_IS_VALID_ALL ?= y
 CFG_ADI_OTP_IS_WRITTEN_ALL ?= y
+endif
+
+else
+$(error Unsupported PLATFORM_FLAVOR "$(PLATFORM_FLAVOR)")
+endif
+
+$(call force,CFG_CORE_ASLR,y)
+
+CFG_TEE_CORE_NB_CORE ?= 1
+
+# Enable SC5xx TRNG to replace Fortuna software PRNG
+$(call force,CFG_WITH_SOFTWARE_PRNG,n)
+CFG_ADSP_SC5XX_TRNG := y
+$(call force,CFG_HWRNG_PTA,y)
+CFG_HWRNG_QUALITY := 1024
 
 # SHARC loader options and configuration
+ifeq ($(CFG_ADSP_SC5XX_OTP),y)
 CFG_ADI_SHARC_LOADER ?= y
 CFG_ADI_SHARC_ALLOW_UNVERIFIED ?= n
+else
+CFG_ADI_SHARC_LOADER ?= n
+CFG_ADI_SHARC_ALLOW_UNVERIFIED ?= y
+endif
 
 # Restrict TRU to OP-TEE and provide SMC to trigger only certain masters
 # If yes the TRU cannot be configured from Linux and the adi,optee-tru
