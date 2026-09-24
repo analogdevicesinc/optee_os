@@ -28,6 +28,9 @@
 #define SPU_SECUREC1		0x984
 #define SPU_SECUREC2		0x988
 
+/* SECURECHK reads all-ones when OP-TEE is running as the secure master */
+#define SPU_SECURECHK_SECURE_MASTER 0xffffffffU
+
 register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_SPU0_BASE, ADSP_SC5XX_SPU0_SIZE);
 
 static vaddr_t spu0_base __nex_bss;
@@ -61,8 +64,8 @@ static TEE_Result init_spu(void)
 	io_write32(spu0_base + SPU_SECUREC2, 1);
 
 	val = io_read32(spu0_base + SPU_SECURECHK);
-	if (val != 0xffffffff)
-		EMSG("OPTEE is not running as a secure master, chk = 0x%x!\n", val);
+	if (val != SPU_SECURECHK_SECURE_MASTER)
+		EMSG("OP-TEE is not running as a secure master, chk = 0x%x!\n", val);
 
 	spu_platform_init();
 	return TEE_SUCCESS;
