@@ -65,6 +65,8 @@ static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 	TEE_Param params[TEE_NUM_PARAMS])
 {
 	uint32_t id;
+	uint32_t len;
+	TEE_Result res;
 	const uint32_t expected = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
 		TEE_PARAM_TYPE_MEMREF_OUTPUT,
 		TEE_PARAM_TYPE_NONE,
@@ -82,8 +84,13 @@ static TEE_Result cmd_read(void *session __unused, uint32_t param_types,
 		return TEE_ERROR_BAD_PARAMETERS;
 	}
 
-	return adi_otp_read(&__otp, id, params[1].memref.buffer,
-		&params[1].memref.size, ADI_OTP_READ_SECURITY);
+	/* memref.size is size_t; adi_otp_read() expects a uint32_t *len */
+	len = params[1].memref.size;
+	res = adi_otp_read(&__otp, id, params[1].memref.buffer, &len,
+		ADI_OTP_READ_SECURITY);
+	params[1].memref.size = len;
+
+	return res;
 }
 
 static TEE_Result cmd_write(void *session __unused, uint32_t param_types,
