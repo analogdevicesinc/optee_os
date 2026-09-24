@@ -55,7 +55,6 @@ TEE_Result hw_get_random_bytes(void *buf, size_t blen)
 {
 	static int fifo_i;
 	static uint32_t fifo[4];
-	uint8_t ret;
 
 	uint8_t *buffer = buf;
 	size_t buffer_i = 0;
