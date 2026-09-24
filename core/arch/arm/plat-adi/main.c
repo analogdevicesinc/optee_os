@@ -33,7 +33,7 @@ static int adsp_serial_getchar(struct serial_chip *chip __unused)
 					    MEM_AREA_IO_NSEC,
 					    ADSP_SC5XX_UART_SIZE);
 
-	while (!(io_read32(uart_base + ADI_UART4_STATUS) & ADI_UART4_RBR))
+	while (!(io_read32(uart_base + ADI_UART4_STATUS) & ADI_UART4_STATUS_DR))
 		;
 
 	io_write32(uart_base + ADI_UART4_STATUS, 0xffffffff);
@@ -72,9 +72,5 @@ static struct serial_chip uart_chip __nex_bss = {
  */
 void plat_console_init(void)
 {
-	vaddr_t uart_base = core_mmu_get_va(ADSP_SC5XX_UART0_BASE,
-					    MEM_AREA_IO_NSEC,
-					    ADSP_SC5XX_UART_SIZE);
-
 	register_serial_console(&uart_chip);
 }

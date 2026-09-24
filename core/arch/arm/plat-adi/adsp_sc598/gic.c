@@ -14,7 +14,7 @@
 
 register_phys_mem(MEM_AREA_IO_SEC, ADSP_SC5XX_GICD_BASE, ADSP_SC5XX_GIC_SIZE);
 
-void main_init_gic(void)
+void boot_primary_init_intc(void)
 {
 	gic_init(0, ADSP_SC5XX_GICD_BASE);
 }
