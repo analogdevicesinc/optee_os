@@ -382,7 +382,7 @@ jobs:
     steps:
       - name: Host cleanup
         run: |
-          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/heads/master/scripts/ci-host-cleanup.sh
+          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/tags/4.10.0/scripts/ci-host-cleanup.sh
           bash ci-host-cleanup.sh
       - name: Create Dockerfile
         run: |
@@ -476,7 +476,7 @@ jobs:
     steps:
       - name: Host cleanup
         run: |
-          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/heads/master/scripts/ci-host-cleanup.sh
+          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/tags/4.10.0/scripts/ci-host-cleanup.sh
           bash ci-host-cleanup.sh
       - name: Create Dockerfile
         run: |
@@ -622,7 +622,7 @@ jobs:
     steps:
       - name: Host cleanup
         run: |
-          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/heads/master/scripts/ci-host-cleanup.sh
+          wget https://raw.githubusercontent.com/OP-TEE/optee_os/refs/tags/4.10.0/scripts/ci-host-cleanup.sh
           bash ci-host-cleanup.sh
       - name: Create Dockerfile
         run: |
